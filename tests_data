@@ -1,0 +1,7 @@
+1:{"uuid": "589e6dcc-bff7-42a8-952d-22315eb4a55c", "name": "Coralie", "age": 35, "boolean": false, "double": 0.2404}
+2:{"uuid": "54d125f6-be81-4878-808d-94d49f9dd336", "name": "Arnoldo", "age": 35, "boolean": true, "double": 0.3722}
+3:{"uuid": "8d089a39-7ab8-46c2-a8d2-ba2ac5cf4b00", "name": "Sabina", "age": 35, "boolean": true, "double": 0.7739}
+4:{"uuid": "5aa73825-f248-4127-95cf-9df208fb58c6", "name": "Dean", "age": 35, "boolean": true, "double": 0.6072}
+5:{"uuid": "2122b81a-78f3-42cf-9533-c91a98ca9da0", "name": "Eula", "age": 35, "boolean": true, "double": 0.9807}
+6:{"uuid": "1c84598c-b093-4f4e-a3f0-25f6993fbe07", "name": "Frances", "age": 35, "boolean": false, "double": 0.7621}
+7:{"uuid": "11da3626-5a60-4ed7-9d39-39e07f88db19", "name": "Natalie", "age": 35, "boolean": true, "double": 0.3559}
