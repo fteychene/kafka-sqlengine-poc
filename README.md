@@ -6,28 +6,26 @@ POC project to work on a light sql engine over [Apache Kafka](https://kafka.apac
 
 Runnable example [here](core/src/main/java/xyw/fteychene/kafka/sqlengine/core/Main.java)
 
-Define a table and column and their source
+Define a table and value and their source
 ```java
-var table = new KafkaTable("test", List.of(
-        new Column.Data("key", SqlType.VARCHAR, RecordSource.KEY), // Based on the record key
-        new Column.Metadata(Column.RecordMetadata.TIMESTAMP), // Record metadata
-        new Column.Metadata(Column.RecordMetadata.OFFSET),
-        new Column.Metadata(Column.RecordMetadata.PARTITION),
-        // Record value is a Json
-        new Column.Json(Optional.empty(), new JsonSchema(List.of(
-                new JsonSchema.JsonField("id", "uuid", SqlType.VARCHAR),
-                new JsonSchema.JsonField("name", SqlType.VARCHAR),
-                new JsonSchema.JsonField("age", SqlType.INTEGER),
-                new JsonSchema.JsonField("boolean", SqlType.BOOLEAN),
-                new JsonSchema.JsonField("double", "double", SqlType.DOUBLE)
-        )), RecordSource.VALUE)
+var table = new KafkaTable("test",
+        List.of(RecordMetadata.TIMESTAMP, RecordMetadata.OFFSET, RecordMetadata.PARTITION),
+        List.of(
+        new Value.Data("key", RecordSource.KEY, SqlType.VARCHAR),
+        new Value.Json(Optional.empty(), RecordSource.VALUE, new JsonSchema(
+        new JsonSchema.JsonField("id", "uuid", SqlType.VARCHAR),
+        new JsonSchema.JsonField("name", SqlType.VARCHAR),
+        new JsonSchema.JsonField("age", SqlType.INTEGER),
+        new JsonSchema.JsonField("boolean", SqlType.BOOLEAN),
+        new JsonSchema.JsonField("double", SqlType.DOUBLE)
+        ))
+        ))
 ));
 ```
 
 Define a calcite schema with tables defined and kafka properties
 ```java
-var kafkaLoader = new KafkaLoader(Map.of(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092"));
-Schema calciteSchema = new CalciteSchema(List.of(table), kafkaLoader);
+Schema calciteSchema = new CalciteSchema(IO_POOL, List.of(table), topic -> KafkaFullScanEnumerator.createFullScanEnumerator(kafkaAdminClient, kafkaConsumer, topic));
 ```
 
 Run a query

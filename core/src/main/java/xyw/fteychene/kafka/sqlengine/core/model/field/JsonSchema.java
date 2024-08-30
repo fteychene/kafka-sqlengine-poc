@@ -18,4 +18,8 @@ public class JsonSchema {
     }
 
     List<JsonField> fields;
+
+    public JsonSchema(JsonField... fields) {
+        this.fields = List.of(fields);
+    }
 }

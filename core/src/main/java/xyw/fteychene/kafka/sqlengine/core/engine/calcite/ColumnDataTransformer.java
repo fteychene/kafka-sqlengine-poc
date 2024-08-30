@@ -5,38 +5,48 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
 import xyw.fteychene.kafka.sqlengine.core.model.KafkaRecord;
-import xyw.fteychene.kafka.sqlengine.core.model.field.Column;
+import xyw.fteychene.kafka.sqlengine.core.model.field.Value;
+import xyw.fteychene.kafka.sqlengine.core.model.field.CsvSchema;
 import xyw.fteychene.kafka.sqlengine.core.model.field.JsonSchema;
+import xyw.fteychene.kafka.sqlengine.core.model.field.RecordMetadata;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Data
+@AllArgsConstructor
 public class ColumnDataTransformer {
 
-    List<Column> columns;
+    List<RecordMetadata> metadataColumns;
+    List<Value> values;
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public ColumnDataTransformer(List<Column> columns) {
-        this.columns = columns;
+    public ColumnDataTransformer(List<RecordMetadata> metadataColumns, List<Value> values) {
+        this.metadataColumns = metadataColumns;
+        this.values = values;
     }
 
     public Stream<Object> datas(KafkaRecord record) {
-        return columns.stream()
-                .flatMap(column -> switch (column) {
-                    case Column.Data data -> data.source().getExtract().andThen(value -> switch (data.type()) {
-                        case VARCHAR -> new String(value.array());
-                        case INTEGER -> value.getInt();
-                        case BIGINT -> value.getLong();
-                        case BOOLEAN -> value.get() == 1;
-                        case FLOAT -> value.getFloat();
-                        case DOUBLE -> value.getDouble();
-                    }).andThen(Stream::of).apply(record);
-                    case Column.Json json ->
-                            json.source().getExtract().andThen(value -> jsonColumn(value, json.schema())).apply(record);
-                    case Column.Metadata metadata -> Stream.of(metadataColumn(metadata.source(), record));
-                });
+        return Stream.concat(
+                metadataColumns.stream()
+                        .map(metadata -> metadataColumn(metadata, record)),
+                values.stream()
+                        .flatMap(column -> switch (column) {
+                            case Value.Data data -> data.source().getExtract().andThen(value -> switch (data.type()) {
+                                case VARCHAR -> new String(value.array());
+                                case INTEGER -> value.getInt();
+                                case BIGINT -> value.getLong();
+                                case BOOLEAN -> value.get() == 1;
+                                case FLOAT -> value.getFloat();
+                                case DOUBLE -> value.getDouble();
+                            }).andThen(Stream::of).apply(record);
+                            case Value.Json json ->
+                                    json.source().getExtract().andThen(value -> jsonColumn(value, json.schema())).apply(record);
+                            case Value.Csv csv ->
+                                    csv.source().getExtract().andThen(value -> csvColumn(value, csv.schema())).apply(record);
+                        }));
     }
 
     @SneakyThrows
@@ -55,7 +65,22 @@ public class ColumnDataTransformer {
                 });
     }
 
-    Object metadataColumn(Column.RecordMetadata metadataSource, KafkaRecord record) {
+    @SneakyThrows
+    Stream<Object> csvColumn(ByteBuffer source, CsvSchema schema) {
+        String row = new String(source.array());
+        String[] values = row.split(schema.getSeparator());
+        return IntStream.range(0, schema.getColumns().size())
+                .boxed()
+                .map(index -> switch (schema.getColumns().get(index).type()) {
+                    case VARCHAR -> values[index];
+                    case INTEGER -> Integer.valueOf(values[index]);
+                    case BIGINT -> Long.valueOf(values[index]);
+                    case BOOLEAN -> Boolean.parseBoolean(values[index]);
+                    case FLOAT, DOUBLE -> Double.valueOf(values[index]);
+                });
+    }
+
+    Object metadataColumn(RecordMetadata metadataSource, KafkaRecord record) {
         return switch (metadataSource) {
             case TIMESTAMP -> record.getTimestamp();
             case PARTITION -> record.getPartition();
