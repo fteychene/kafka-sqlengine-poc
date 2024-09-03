@@ -8,6 +8,8 @@ Todo
  - [ ] Optimize kafka loading
  - [ ] Index support
  - [ ] Optimize data parsing and access
+ - [ ] Avro support
+ - [ ] Json schema inference
 
 ### Example
 
