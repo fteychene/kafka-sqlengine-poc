@@ -73,4 +73,17 @@ Output on sample datas
 Setup
  - Local Kafka
  - Topic with 1 partition
- - Dataset 
+ - Dataset
+
+Datas (https://www.kaggle.com/datasets/zanjibar/100-million-data-csv)
+ - 113+ millions rows
+ - Csv
+ - 8 columns
+
+Sql request : `SELECT yearm, SUM(val) as amount from CUSTOM GROUP BY yearm ORDER BY yearm`
+ - Full scan
+ - No index
+
+| Hardware | Execution time |
+| -------- | -------------- |
+| Laptop (TBD) | 135412 ms |
