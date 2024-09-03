@@ -2,6 +2,13 @@
 
 POC project to work on a light sql engine over [Apache Kafka](https://kafka.apache.org/) using [Apache Calcite](https://github.com/apache/calcite)
 
+Todo
+ - [ ] Data cache
+ - [ ] Model rework
+ - [ ] Optimize kafka loading
+ - [ ] Index support
+ - [ ] Optimize data parsing and access
+
 ### Example
 
 Runnable example [here](core/src/main/java/xyw/fteychene/kafka/sqlengine/core/Main.java)
@@ -58,3 +65,10 @@ Output on sample datas
 ║ 7         1723132468822   6            0               11da3626-5a60-4ed7-9d39-39e07f88db19  Natalie    35        true          0.3559      ║
 ╚═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
+
+## Benchmark 
+
+Setup
+ - Local Kafka
+ - Topic with 1 partition
+ - Dataset 
